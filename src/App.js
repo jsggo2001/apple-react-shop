@@ -1,15 +1,18 @@
-import logo from "./logo.svg";
 import "./App.css";
+import { createContext, useState } from "react";
 import { Navbar, Nav } from "react-bootstrap";
-import bg from "./image/bg.png";
-import { useState } from "react";
 import data from "./data.js";
 import { Routes, Route, Link, useNavigate, Outlet } from "react-router-dom";
 import Detail from "./routes/Detail.js";
 import axios from "axios";
 
+export let Context1 = createContext();
+
 function App() {
-  let [shoes] = useState(data);
+
+  let [shoes, setShose] = useState(data);
+  let [재고] = useState([10, 11, 12])
+
   let navigate = useNavigate();
 
   return (
@@ -51,22 +54,32 @@ function App() {
               <button
                 onClick={() => {
                   axios
-                    .get("https://codingapple1.github.io/shop/data2son")
+                    .get("https://codingapple1.github.io/shop/data2.json")
                     .then((결과) => {
                       console.log(결과.data);
+                      console.log(shoes)
+                      let copy = [...shoes, ...결과.data];
+                      setShose(copy);
+                      console.log(shoes);
                     })
-                    .catch(() => {
-                      console.log("실패함...");
-                    });
+                    
+                    // Promise.all([axios.get('/url1') ,axios.get('/url2')])
+                    // .then(()=>{ 
+
+                    // })
+                    // 이런식으로 하면 두개의 요청이 성공 했을 때 then 실행 가능
                 }}
               >
-                버튼
+                더보기
               </button>
             </>
           }
         />
-        <Route path="/detail/:id" element={<Detail shoes={shoes} />} />
-
+        <Route path="/detail/:id" element={
+          <Context1.Provider value={{ 재고 }}>
+            <Detail shoes={shoes} />
+          </Context1.Provider>
+        } />
         <Route path="/about" element={<About />}>
           <Route path="member" element={<div>멤버임</div>} />
           <Route path="location" element={<div>위치정보임</div>} />
