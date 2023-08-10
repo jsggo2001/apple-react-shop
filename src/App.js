@@ -1,19 +1,35 @@
 import "./App.css";
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect} from "react";
 import { Navbar, Nav } from "react-bootstrap";
 import data from "./data.js";
-import { Routes, Route, Link, useNavigate, Outlet } from "react-router-dom";
+import { Routes, Route, useNavigate, Outlet } from "react-router-dom";
 import Detail from "./routes/Detail.js";
 import axios from "axios";
+import Cart from './routes/Cart.js'
+import { useQuery } from '@tanstack/react-query'
 
 export let Context1 = createContext();
 
 function App() {
 
+  useEffect(()=>{
+    localStorage.setItem('watched', JSON.stringify([]))
+  }, [])
+
+  let obj = {name : 'kim'}
+  localStorage.setItem('data', JSON.stringify(obj));
+  let 꺼낸거 = localStorage.getItem('data')
+
+  console.log(JSON.parse(꺼낸거).name);
+
   let [shoes, setShose] = useState(data);
   let [재고] = useState([10, 11, 12])
-
   let navigate = useNavigate();
+
+  let result = useQuery('작명', ()=>
+    axios.get('https://codingapple1.github.io/userdata.json')
+    .then((a)=>{ return a.data })
+  )
 
   return (
     <div className="App">
@@ -35,6 +51,18 @@ function App() {
           >
             Detail
           </Nav.Link>
+          <Nav.Link
+            onClick={() => {
+              navigate("/cart");
+            }}
+          >
+            Cart
+          </Nav.Link>
+        </Nav>
+        <Nav className="ms-auto">
+          { result.isLoading && '로딩중' }
+          { result.error && '에러남' }
+          { result.data && result.data.name }
         </Nav>
       </Navbar>
 
@@ -84,6 +112,9 @@ function App() {
           <Route path="member" element={<div>멤버임</div>} />
           <Route path="location" element={<div>위치정보임</div>} />
         </Route>
+
+        <Route path="/cart" element={ <Cart/> }/>
+
       </Routes>
     </div>
   );

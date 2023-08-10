@@ -1,6 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Nav } from 'react-bootstrap';
+import { useSelector, useDispatch } from "react-redux"
+import { addItem } from './../store.js'
 
 import { Context1 } from './../App.js'
 
@@ -38,11 +40,25 @@ import { Context1 } from './../App.js'
 function Detail(props) {
 
   let {재고} = useContext(Context1);
-
   let [count, setCount] = useState(0);
   let [alert, setalert] = useState(true);
   let [num, setNum] = useState("");
   let [탭, 탭변경] = useState(0);
+  let dispatch = useDispatch()
+  
+  let { id } = useParams();
+  let 찾은상품 = props.shoes.find(function (x) {
+    return x.id == id;
+  });
+
+  useEffect(()=>{
+    let 꺼낸거 = localStorage.getItem('watched');
+    꺼낸거 = JSON.parse(꺼낸거)
+    꺼낸거.push(찾은상품.id)
+    꺼낸거 = new Set(꺼낸거)
+    꺼낸거 = Array.from(꺼낸거)
+    localStorage.setItem('watched', JSON.stringify(꺼낸거))
+  }, [])
 
   useEffect(() => {
     if (isNaN(num) == true) {
@@ -71,10 +87,6 @@ function Detail(props) {
     };
   }, []);
 
-  let { id } = useParams();
-  let 찾은상품 = props.shoes.find(function (x) {
-    return x.id == id;
-  });
 
   return (
     <div className="container">
@@ -110,7 +122,9 @@ function Detail(props) {
           <h4 className="pt-5">{찾은상품.title}</h4>
           <p>{찾은상품.content}</p>
           <p>{찾은상품.price}</p>
-          <button className="btn btn-danger">주문하기</button>
+          <button className="btn btn-danger" onClick={()=>{
+            dispatch(addItem( {id : 1, name : 'Red Knit', count : 1} ))
+          }}>주문하기</button>
         </div>
       </div>
 
